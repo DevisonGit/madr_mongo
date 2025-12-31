@@ -1,40 +1,32 @@
-import pytest
-from fastapi.testclient import TestClient
-from pymongo import MongoClient
+import logging
+
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+from pymongo import AsyncMongoClient
 from testcontainers.mongodb import MongoDbContainer
 
-from app.db.database import get_collection
 from app.main import app
 
-
-@pytest.fixture(scope='session')
-def mongo_container():
-    with MongoDbContainer('mongo:7.0') as container:
-        yield container
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-@pytest.fixture(scope='session')
-def db_client(mongo_container):
-    connection_url = mongo_container.get_connection_url()
-    client = MongoClient(connection_url)
-    yield client
-    client.close()
+@pytest_asyncio.fixture(scope='session')
+async def mongo_container():
+    with MongoDbContainer('mongo:latest') as mongo:
+        yield mongo
 
 
-@pytest.fixture
-def client(db_client):
+@pytest_asyncio.fixture
+async def client(mongo_container):
+    mongo_url = mongo_container.get_connection_url()
+    client = AsyncMongoClient(mongo_url)
 
-    def override_get_collection():
-        yield db_client.test_db
+    app.database = client['test_db']
 
-    app.dependency_overrides[get_collection] = override_get_collection
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url='http://test'
+    ) as ac:
+        yield ac
 
-    with TestClient(app) as client:
-        yield client
-
-    app.dependency_overrides.clear()
-
-
-@pytest.fixture(autouse=True)
-def clean_db(db_client):
-    db_client.drop_database('test_db')
+    await client.close()

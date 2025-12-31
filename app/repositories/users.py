@@ -1,17 +1,16 @@
 from bson import ObjectId
 from pymongo import ReturnDocument
+from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.errors import DuplicateKeyError
 
-from app.db.database import get_collection
 from app.exceptions.user import UserAlreadyExists, UserNotFound
-from app.schemas.user.create import UserCreate
 
 
 class UserRepository:
-    def __init__(self):
-        self.collection = get_collection('users')
+    def __init__(self, db: AsyncDatabase):
+        self.collection = db['users']
 
-    async def create(self, new_user: UserCreate):
+    async def create(self, new_user: dict):
         try:
             result = await self.collection.insert_one(new_user)
             new_user['_id'] = result.inserted_id

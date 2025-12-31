@@ -1,4 +1,3 @@
-from app.exceptions.user import UserNotFound
 from app.repositories.users import UserRepository
 from app.schemas.user.create import UserCreate
 from app.schemas.user.public import UserPublic
@@ -7,8 +6,8 @@ from app.utils.sanitize import sanitize_string
 
 
 class UserService:
-    def __init__(self):
-        self.repo = UserRepository()
+    def __init__(self, repo: UserRepository):
+        self.repo = repo
 
     async def create(self, user: UserCreate) -> UserPublic:
         new_user = user.model_dump(by_alias=True)

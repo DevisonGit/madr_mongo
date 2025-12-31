@@ -1,6 +1,8 @@
 import logging.config
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from pymongo import AsyncMongoClient
 
 from app.api.v1.routers import router as router_v1
 from app.core.exception_handlers import (
@@ -8,10 +10,20 @@ from app.core.exception_handlers import (
     unhandled_exception_handler,
 )
 from app.core.logging import LOGGING_CONFIG
+from app.core.settings import settings
 from app.exceptions.base import DomainException
 
+
+@asynccontextmanager
+async def db_lifespan(app: FastAPI):
+    app.mongodb_client = AsyncMongoClient(settings.mongodb_url)
+    app.database = app.mongodb_client['madr']
+    yield
+    await app.mongodb_client.close()
+
+
 logging.config.dictConfig(LOGGING_CONFIG)
-app = FastAPI()
+app = FastAPI(lifespan=db_lifespan)
 
 
 app.include_router(router_v1, prefix='/api/v1')

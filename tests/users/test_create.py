@@ -1,8 +1,11 @@
 from http import HTTPStatus
 
+import pytest
 
-def test_create_user(client):
-    response = client.post(
+
+@pytest.mark.asyncio
+async def test_create_user(client):
+    response = await client.post(
         '/api/v1/users/',
         json={
             'username': 'test',
