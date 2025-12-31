@@ -1,0 +1,14 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: madr_mongo_db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    ports:
+      - "${MONGO_PORT}:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
