@@ -1,7 +1,9 @@
+from app.exceptions.user import UserNotFound
 from app.repositories.users import UserRepository
 from app.schemas.user.create import UserCreate
 from app.schemas.user.public import UserPublic
 from app.schemas.user.update import UserUpdate
+from app.utils.sanitize import sanitize_string
 
 
 class UserService:
@@ -10,6 +12,7 @@ class UserService:
 
     async def create(self, user: UserCreate) -> UserPublic:
         new_user = user.model_dump(by_alias=True)
+        new_user['username'] = sanitize_string(new_user['username'])
         return await self.repo.create(new_user)
 
     async def delete(self, user_id: str):
@@ -23,4 +26,8 @@ class UserService:
             if v is not None
         }
         if len(user) >= 1:
+            if user['username']:
+                user['username'] = sanitize_string(user['username'])
             return await self.repo.update(user_id, user)
+        else:
+            return await self.repo.read(user_id)
