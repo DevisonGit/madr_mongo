@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 from fastapi import APIRouter
 
+from app.api.deps.aliases import CurrentUser
 from app.api.deps.sevice import UserServiceDep
 from app.schemas.message import Message
 from app.schemas.user.create import UserCreate
@@ -22,7 +23,8 @@ async def create_user(user: UserCreate, service: UserServiceDep):
 
 
 @router.delete('/{user_id}', response_model=Message)
-async def delete_user(user_id: str, service: UserServiceDep):
+async def delete_user(
+        user_id: str, service: UserServiceDep, current_user: CurrentUser):
     return await service.delete(user_id)
 
 

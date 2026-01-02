@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     mongo_db: str
     mongo_host: str
     mongo_port: int
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    SECRET_KEY: str
+    ALGORITHM: str
 
     model_config = SettingsConfigDict(env_file='.env')
 

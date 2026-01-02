@@ -4,6 +4,7 @@ from pymongo.asynchronous.database import AsyncDatabase
 from pymongo.errors import DuplicateKeyError
 
 from app.exceptions.user import UserAlreadyExists, UserNotFound
+from app.schemas.user.create import UserCreate
 
 
 class UserRepository:
@@ -38,4 +39,10 @@ class UserRepository:
         result = await self.collection.find_one({'_id': ObjectId(user_id)})
         if result is not None:
             return result
+        raise UserNotFound()
+
+    async def read_username(self, username: str) -> UserCreate:
+        result = await self.collection.find_one({'email': username})
+        if result is not None:
+            return UserCreate.model_validate(result)
         raise UserNotFound()

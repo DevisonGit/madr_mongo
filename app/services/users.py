@@ -1,3 +1,4 @@
+from app.core.security import get_password_hash
 from app.repositories.users import UserRepository
 from app.schemas.user.create import UserCreate
 from app.schemas.user.public import UserPublic
@@ -12,6 +13,7 @@ class UserService:
     async def create(self, user: UserCreate) -> UserPublic:
         new_user = user.model_dump(by_alias=True)
         new_user['username'] = sanitize_string(new_user['username'])
+        new_user['password'] = get_password_hash(new_user['password'])
         return await self.repo.create(new_user)
 
     async def delete(self, user_id: str):
