@@ -24,12 +24,18 @@ async def create_user(user: UserCreate, service: UserServiceDep):
 
 @router.delete('/{user_id}', response_model=Message)
 async def delete_user(
-        user_id: str, service: UserServiceDep, current_user: CurrentUser):
+    user_id: str, service: UserServiceDep, current_user: CurrentUser
+):
     return await service.delete(user_id)
 
 
 @router.put(
     '/{user_id}', response_model=UserPublic, response_model_by_alias=False
 )
-async def update_user(user_id: str, user: UserUpdate, service: UserServiceDep):
+async def update_user(
+    user_id: str,
+    user: UserUpdate,
+    service: UserServiceDep,
+    current_user: CurrentUser,
+):
     return await service.update(user_id, user)

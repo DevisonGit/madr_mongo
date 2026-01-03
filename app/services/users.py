@@ -27,8 +27,10 @@ class UserService:
             if v is not None
         }
         if len(user) >= 1:
-            if user['username']:
+            if user.get('username'):
                 user['username'] = sanitize_string(user['username'])
+            if user.get('password'):
+                user['password'] = get_password_hash(user['password'])
             return await self.repo.update(user_id, user)
         else:
             return await self.repo.read(user_id)
