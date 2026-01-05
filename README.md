@@ -11,4 +11,6 @@ uv add fastapi --extra standard
 uv add --dev pytest pytest-cov taskipy ruff testcontainers pytest-asyncio
 uv add pwdlib
 uv add jwt
+
+gh secret set -f .env
 ```

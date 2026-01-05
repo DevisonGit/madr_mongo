@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator
 
 from .base import AuthorBase
 

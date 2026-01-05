@@ -25,8 +25,9 @@ class AuthorRepository:
 
     async def delete(self, author_id: str):
         try:
-            result = await self.collection.delete_one(
-                {'_id': ObjectId(author_id)})
+            result = await self.collection.delete_one({
+                '_id': ObjectId(author_id)
+            })
             if result.deleted_count == 1:
                 return True
             raise AuthorNotFound()
@@ -54,6 +55,6 @@ class AuthorRepository:
                 return_document=ReturnDocument.AFTER,
             )
             if result is None:
-               raise AuthorNotFound()
+                raise AuthorNotFound()
         result['id'] = str(result.pop('_id'))
         return AuthorPublic.model_validate(result)

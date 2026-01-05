@@ -21,14 +21,16 @@ async def create_author(
 
 @router.delete('/{author_id}', response_model=Message)
 async def delete_author(
-     author_id: str, current_user:CurrentUser, service: AuthorServiceDep
+    author_id: str, current_user: CurrentUser, service: AuthorServiceDep
 ):
     return await service.delete(author_id)
 
 
 @router.put('/{author_id}', response_model=AuthorPublic)
 async def update_author(
-    author_id: str, author: AuthorUpdate,
-        current_user: CurrentUser, service: AuthorServiceDep
+    author_id: str,
+    author: AuthorUpdate,
+    current_user: CurrentUser,
+    service: AuthorServiceDep,
 ):
     return await service.update(author_id, author)
