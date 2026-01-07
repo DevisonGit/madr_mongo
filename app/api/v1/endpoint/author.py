@@ -3,8 +3,10 @@ from http import HTTPStatus
 from fastapi import APIRouter
 
 from app.api.deps.aliases import CurrentUser
+from app.api.deps.author import AuthorFilterDep
 from app.api.deps.sevice import AuthorServiceDep
 from app.schemas.author.create import AuthorCreate
+from app.schemas.author.list import AuthorList
 from app.schemas.author.public import AuthorPublic
 from app.schemas.author.update import AuthorUpdate
 from app.schemas.message import Message
@@ -34,3 +36,15 @@ async def update_author(
     service: AuthorServiceDep,
 ):
     return await service.update(author_id, author)
+
+
+@router.get('/{author_id}', response_model=AuthorPublic)
+async def get_author_by_id(author_id: str, service: AuthorServiceDep):
+    return await service.get_author_by_id(author_id)
+
+
+@router.get('/', response_model=AuthorList)
+async def get_authors(
+    service: AuthorServiceDep, author_filter: AuthorFilterDep
+):
+    return await service.get_authors_filter(author_filter)

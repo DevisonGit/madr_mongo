@@ -1,3 +1,5 @@
+import re
+
 from bson import ObjectId
 from bson.errors import InvalidId
 from pymongo import ReturnDocument
@@ -6,6 +8,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.exceptions.author import AuthorAlreadyExists, AuthorNotFound
 from app.schemas.author.base import AuthorBase
+from app.schemas.author.filter import AuthorFilter
 from app.schemas.author.public import AuthorPublic
 from app.schemas.author.update import AuthorUpdate
 
@@ -58,3 +61,32 @@ class AuthorRepository:
                 raise AuthorNotFound()
         result['id'] = str(result.pop('_id'))
         return AuthorPublic.model_validate(result)
+
+    async def get_author_by_id(self, author_id: str):
+        _id = self.parse_object_id(author_id)
+        if (
+            author := await self.collection.find_one({'_id': _id})
+        ) is not None:
+            author['id'] = str(author.pop('_id'))
+            return AuthorPublic.model_validate(author)
+        raise AuthorNotFound()
+
+    async def get_authors_filter(self, author_filter: AuthorFilter):
+        escaped = re.escape(author_filter.name.lower())
+
+        cursor = self.collection.find({'name': {'$regex': escaped}})
+
+        authors = await cursor.to_list(length=author_filter.limit)
+        return [self._to_public(author) for author in authors]
+
+    @staticmethod
+    def _to_public(author: dict) -> AuthorPublic:
+        author['id'] = str(author.pop('_id'))
+        return AuthorPublic.model_validate(author)
+
+    @staticmethod
+    def parse_object_id(author_id: str) -> ObjectId:
+        try:
+            return ObjectId(author_id)
+        except InvalidId:
+            raise AuthorNotFound()
