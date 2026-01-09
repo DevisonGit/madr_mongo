@@ -1,3 +1,5 @@
+import re
+
 from bson import ObjectId
 from bson.errors import InvalidId
 from pymongo import ReturnDocument
@@ -6,6 +8,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.exceptions.book import BookAlreadyExists, BookNotFound
 from app.schemas.book.create import BookCreate
+from app.schemas.book.filter import BookFilter
 from app.schemas.book.public import BookPublic
 from app.schemas.book.update import BookUpdate
 
@@ -50,6 +53,25 @@ class BookRepository:
             if result is None:
                 raise BookNotFound()
         return self._to_public(result)
+
+    async def get_book_by_id(self, book_id: str):
+        _id = self._parse_object_id(book_id)
+        if (book := await self.collection.find_one({'_id': _id})) is not None:
+            return self._to_public(book)
+        raise BookNotFound()
+
+    async def get_books_filter(self, book_filter: BookFilter):
+        query = {}
+        if book_filter.title:
+            escaped = re.escape(book_filter.title.lower())
+            query['title'] = {'$regex': escaped}
+        if book_filter.year:
+            query['year'] = book_filter.year
+
+        cursor = self.collection.find(query)
+
+        books = await cursor.to_list(length=book_filter.limit)
+        return [self._to_public(book) for book in books]
 
     @staticmethod
     def _parse_object_id(book_id: str) -> ObjectId:

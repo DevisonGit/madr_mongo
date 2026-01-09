@@ -1,6 +1,7 @@
 from app.repositories.authors import AuthorRepository
 from app.repositories.books import BookRepository
 from app.schemas.book.create import BookCreate
+from app.schemas.book.filter import BookFilter
 from app.schemas.book.update import BookUpdate
 from app.utils.sanitize import sanitize_string
 
@@ -25,3 +26,10 @@ class BookService:
         if book.title:
             book.title = sanitize_string(book.title)
         return await self.repo.update(book_id, book)
+
+    async def get_book_by_id(self, book_id: str):
+        return await self.repo.get_book_by_id(book_id)
+
+    async def get_book_filter(self, book_filter: BookFilter):
+        books = await self.repo.get_books_filter(book_filter)
+        return {'books': books}
