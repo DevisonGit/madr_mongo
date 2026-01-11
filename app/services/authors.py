@@ -70,8 +70,12 @@ class AuthorService:
     async def get_authors_filter(
         self, author_filter: AuthorFilter
     ) -> AuthorList:
-        name = re.escape(author_filter.name.lower())
-        authors = await self.repo.get_authors_filter(name, author_filter.limit)
+        authors = []
+        if author_filter.name:
+            name = re.escape(author_filter.name.lower())
+            authors = await self.repo.get_authors_filter(
+                name, author_filter.limit
+            )
         return AuthorList(
             authors=[self._to_public(author) for author in authors]
         )
