@@ -1,6 +1,8 @@
 import logging
 
+import pytest
 import pytest_asyncio
+from bson import ObjectId
 from httpx import ASGITransport, AsyncClient
 from pymongo import AsyncMongoClient
 from testcontainers.mongodb import MongoDbContainer
@@ -63,3 +65,8 @@ async def token(client, user):
         data={'username': user.email, 'password': PASSWORD},
     )
     return response.json()['access_token']
+
+
+@pytest.fixture
+def object_id():
+    return ObjectId()
