@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from jwt import DecodeError, ExpiredSignatureError, decode
 
 from app.api.deps.sevice import AuthServiceDep
@@ -11,7 +11,6 @@ from app.exceptions.auth import AuthCredentialsValidate
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl='auth/token', refreshUrl='auth/refresh'
 )
-OAuth2Form = Annotated[OAuth2PasswordRequestForm, Depends()]
 Token = Annotated[str, Depends(oauth2_scheme)]
 
 

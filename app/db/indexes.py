@@ -1,0 +1,7 @@
+async def create_indexes(db):
+    await db.users.create_index(
+        'email', unique=True, name='users_email_unique'
+    )
+    await db.users.create_index(
+        'username', unique=True, name='users_username_unique'
+    )

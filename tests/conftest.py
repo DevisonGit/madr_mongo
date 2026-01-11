@@ -5,10 +5,14 @@ from httpx import ASGITransport, AsyncClient
 from pymongo import AsyncMongoClient
 from testcontainers.mongodb import MongoDbContainer
 
+from app.core.security import get_password_hash
+from app.db.indexes import create_indexes
 from app.main import app
+from app.schemas.user.public import UserPublic
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+PASSWORD = 'testtest'
 
 
 @pytest_asyncio.fixture(scope='session')
@@ -23,6 +27,7 @@ async def client(mongo_container):
     client = AsyncMongoClient(mongo_url)
 
     app.database = client['test_db']
+    await create_indexes(app.database)
 
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url='http://test'
@@ -30,3 +35,31 @@ async def client(mongo_container):
         yield ac
 
     await client.close()
+
+
+@pytest_asyncio.fixture
+async def user():
+    user = {
+        'username': 'test',
+        'email': 'test@test.com',
+        'password': get_password_hash(PASSWORD),
+    }
+    result = await app.database.users.insert_one(user)
+    user['id'] = result.inserted_id
+    return UserPublic.model_validate(user)
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def clear_database(client):
+    yield
+    for collection in await app.database.list_collection_names():
+        await app.database[collection].delete_many({})
+
+
+@pytest_asyncio.fixture
+async def token(client, user):
+    response = await client.post(
+        '/api/v1/auth/token',
+        data={'username': user.email, 'password': PASSWORD},
+    )
+    return response.json()['access_token']
