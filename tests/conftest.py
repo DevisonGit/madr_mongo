@@ -10,6 +10,7 @@ from testcontainers.mongodb import MongoDbContainer
 from app.core.security import get_password_hash
 from app.db.indexes import create_indexes
 from app.main import app
+from app.schemas.author.public import AuthorPublic
 from app.schemas.user.public import UserPublic
 
 logging.basicConfig(level=logging.INFO)
@@ -70,3 +71,11 @@ async def token(client, user):
 @pytest.fixture
 def object_id():
     return ObjectId()
+
+
+@pytest_asyncio.fixture
+async def author():
+    author = {'name': 'machado 98'}
+    result = await app.database.authors.insert_one(author)
+    author['id'] = str(result.inserted_id)
+    return AuthorPublic.model_validate(author)

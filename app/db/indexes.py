@@ -5,3 +5,6 @@ async def create_indexes(db):
     await db.users.create_index(
         'username', unique=True, name='users_username_unique'
     )
+    await db.authors.create_index(
+        'name', unique=True, name='authors_name_unique'
+    )
