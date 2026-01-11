@@ -28,8 +28,8 @@ def author_service(request: Request) -> AuthorService:
 
 def book_service(request: Request) -> BookService:
     repo = BookRepository(request.app.database)
-    author_repo = AuthorRepository(request.app.database)
-    return BookService(repo, author_repo)
+    author = author_service(request.app.database)
+    return BookService(repo, author)
 
 
 UserServiceDep = Annotated[UserService, Depends(user_service)]

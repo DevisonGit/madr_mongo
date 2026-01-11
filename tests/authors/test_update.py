@@ -47,5 +47,5 @@ async def test_update_author_object_invalid(client, token, object_id):
         json={'name': 'test'},
     )
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'error': 'author not found'}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'error': 'id of author invalid'}

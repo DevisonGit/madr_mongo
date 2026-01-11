@@ -23,8 +23,8 @@ async def test_get_author_id_not_found(client, object_id):
 async def test_get_author_id_invalid(client, object_id):
     response = await client.get('/api/v1/authors/1')
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'error': 'author not found'}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'error': 'id of author invalid'}
 
 
 @pytest.mark.asyncio

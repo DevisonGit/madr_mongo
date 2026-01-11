@@ -31,5 +31,5 @@ async def test_delete_author_invalid_id(client, token):
         '/api/v1/authors/1', headers={'Authorization': f'Bearer {token}'}
     )
 
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'error': 'author not found'}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'error': 'id of author invalid'}
