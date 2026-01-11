@@ -8,3 +8,4 @@ async def create_indexes(db):
     await db.authors.create_index(
         'name', unique=True, name='authors_name_unique'
     )
+    await db.books.create_index('title', unique=True, name='title_name_unique')

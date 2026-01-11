@@ -11,6 +11,7 @@ from app.core.security import get_password_hash
 from app.db.indexes import create_indexes
 from app.main import app
 from app.schemas.author.public import AuthorPublic
+from app.schemas.book.public import BookPublic
 from app.schemas.user.public import UserPublic
 
 logging.basicConfig(level=logging.INFO)
@@ -79,3 +80,19 @@ async def author():
     result = await app.database.authors.insert_one(author)
     author['id'] = str(result.inserted_id)
     return AuthorPublic.model_validate(author)
+
+
+@pytest_asyncio.fixture
+async def other_author():
+    author = {'name': 'paulo urso'}
+    result = await app.database.authors.insert_one(author)
+    author['id'] = str(result.inserted_id)
+    return AuthorPublic.model_validate(author)
+
+
+@pytest_asyncio.fixture
+async def book(author):
+    book = {'title': 'test', 'year': 1998, 'author_id': author.id}
+    result = await app.database.books.insert_one(book)
+    book['id'] = str(result.inserted_id)
+    return BookPublic.model_validate(book)

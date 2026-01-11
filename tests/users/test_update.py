@@ -37,3 +37,31 @@ async def test_update_user_not_found(client, user, token, object_id):
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'error': 'user not found'}
+
+
+@pytest.mark.asyncio
+async def test_update_user_empty(client, user, token):
+    response = await client.put(
+        f'/api/v1/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+        json={},
+    )
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json() == {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email,
+    }
+
+
+@pytest.mark.asyncio
+async def test_update_user_empty_not_found(client, object_id, token):
+    response = await client.put(
+        f'/api/v1/users/{object_id}',
+        headers={'Authorization': f'Bearer {token}'},
+        json={},
+    )
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json() == {'error': 'user not found'}
