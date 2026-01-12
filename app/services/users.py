@@ -1,5 +1,11 @@
+from bson import ObjectId
+from bson.errors import InvalidId
+from pymongo.errors import DuplicateKeyError
+
 from app.core.security import get_password_hash
+from app.exceptions.user import UserAlreadyExists, UserInvalidId, UserNotFound
 from app.repositories.users import UserRepository
+from app.schemas.message import Message
 from app.schemas.user.create import UserCreate
 from app.schemas.user.public import UserPublic
 from app.schemas.user.update import UserUpdate
@@ -11,16 +17,27 @@ class UserService:
         self.repo = repo
 
     async def create(self, user: UserCreate) -> UserPublic:
+        user.username = sanitize_string(user.username)
+        user.password = get_password_hash(user.password)
         new_user = user.model_dump(by_alias=True)
-        new_user['username'] = sanitize_string(new_user['username'])
-        new_user['password'] = get_password_hash(new_user['password'])
-        return await self.repo.create(new_user)
 
-    async def delete(self, user_id: str):
-        await self.repo.delete(user_id)
-        return {'message': 'user deleted'}
+        try:
+            user_id = await self.repo.create(new_user)
+        except DuplicateKeyError:
+            raise UserAlreadyExists()
+        new_user['_id'] = user_id
 
-    async def update(self, user_id: str, user: UserUpdate):
+        return self._to_public(new_user)
+
+    async def delete(self, user_id: str) -> Message:
+        _id = self.parse_object_id(user_id)
+        deleted = await self.repo.delete(_id)
+        if not deleted:
+            raise UserNotFound()
+        return Message(message='user deleted')
+
+    async def update(self, user_id: str, user: UserUpdate) -> UserPublic:
+        _id = self.parse_object_id(user_id)
         user = {
             k: v
             for k, v in user.model_dump(by_alias=True).items()
@@ -31,6 +48,21 @@ class UserService:
                 user['username'] = sanitize_string(user['username'])
             if user.get('password'):
                 user['password'] = get_password_hash(user['password'])
-            return await self.repo.update(user_id, user)
+            result = await self.repo.update(_id, user)
         else:
-            return await self.repo.read(user_id)
+            result = await self.repo.get_user_by_id(_id)
+        if not result:
+            raise UserNotFound()
+        return self._to_public(result)
+
+    @staticmethod
+    def _to_public(user: dict) -> UserPublic:
+        user['id'] = str(user.pop('_id'))
+        return UserPublic.model_validate(user)
+
+    @staticmethod
+    def parse_object_id(author_id: str) -> ObjectId:
+        try:
+            return ObjectId(author_id)
+        except InvalidId:
+            raise UserInvalidId()

@@ -65,3 +65,15 @@ async def test_update_user_empty_not_found(client, object_id, token):
 
     assert response.status_code == HTTPStatus.NOT_FOUND
     assert response.json() == {'error': 'user not found'}
+
+
+@pytest.mark.asyncio
+async def test_update_user_invalid_id(client, token):
+    response = await client.put(
+        '/api/v1/users/1',
+        headers={'Authorization': f'Bearer {token}'},
+        json={},
+    )
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json() == {'error': 'id of user invalid'}

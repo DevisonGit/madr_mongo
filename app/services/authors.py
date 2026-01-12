@@ -60,7 +60,7 @@ class AuthorService:
             raise AuthorNotFound()
         return self._to_public(updated)
 
-    async def get_author_by_id(self, author_id: str):
+    async def get_author_by_id(self, author_id: str) -> AuthorPublic:
         _id = self.parse_object_id(author_id)
         author = await self.repo.get_author_by_id(_id)
         if not author:

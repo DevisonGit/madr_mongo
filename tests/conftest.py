@@ -49,7 +49,7 @@ async def user():
         'password': get_password_hash(PASSWORD),
     }
     result = await app.database.users.insert_one(user)
-    user['id'] = result.inserted_id
+    user['id'] = str(result.inserted_id)
     return UserPublic.model_validate(user)
 
 

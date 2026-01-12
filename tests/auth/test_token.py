@@ -33,5 +33,5 @@ async def test_get_token_not_user(client, user):
         '/api/v1/auth/token',
         data={'username': 'invalid', 'password': 'invalid'},
     )
-    assert response.status_code == HTTPStatus.NOT_FOUND
-    assert response.json() == {'error': 'user not found'}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'error': 'incorrect email or password'}
