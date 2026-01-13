@@ -11,6 +11,7 @@ from app.core.exception_handlers import (
 )
 from app.core.logging import LOGGING_CONFIG
 from app.core.settings import settings
+from app.db.indexes import create_indexes
 from app.exceptions.base import DomainException
 
 
@@ -18,6 +19,7 @@ from app.exceptions.base import DomainException
 async def db_lifespan(app: FastAPI):
     app.mongodb_client = AsyncMongoClient(settings.mongodb_url)
     app.database = app.mongodb_client['madr']
+    await create_indexes(app.database)
     yield
     await app.mongodb_client.close()
 
