@@ -1,5 +1,5 @@
 services:
-  mongo:
+  madr_mongo_database:
     image: mongo:7
     container_name: madr_mongo_db
     environment:
@@ -9,6 +9,18 @@ services:
       - "${MONGO_PORT}:27017"
     volumes:
       - mongo_data:/data/db
+    env_file:
+      - .env.docker
+
+  madr_mongo_app:
+    image: madr_mongo_app
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - madr_mongo_database
+    env_file:
+      - .env.docker
 
 volumes:
   mongo_data:
