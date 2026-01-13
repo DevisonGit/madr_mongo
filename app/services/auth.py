@@ -11,7 +11,9 @@ class AuthService:
     def __init__(self, repo: UserRepository):
         self.repo = repo
 
-    async def read(self, form_data: OAuth2PasswordRequestForm):
+    async def login_for_access_token(
+        self, form_data: OAuth2PasswordRequestForm
+    ):
         user = await self.repo.get_user_by_username(form_data.username)
 
         if not user:

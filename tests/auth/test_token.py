@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import pytest
 
+from app.core.security import create_access_token
 from tests.conftest import PASSWORD
 
 
@@ -35,3 +36,27 @@ async def test_get_token_not_user(client, user):
     )
     assert response.status_code == HTTPStatus.UNAUTHORIZED
     assert response.json() == {'error': 'incorrect email or password'}
+
+
+@pytest.mark.asyncio
+async def test_token_not_subject_email(client, user):
+    data = {'test': 'test'}
+    token = create_access_token(data)
+    response = await client.delete(
+        f'/api/v1/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'error': 'could not validate credentials'}
+
+
+@pytest.mark.asyncio
+async def test_token_not_user(client, user):
+    data = {'sub': 'test'}
+    token = create_access_token(data)
+    response = await client.delete(
+        f'/api/v1/users/{user.id}',
+        headers={'Authorization': f'Bearer {token}'},
+    )
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json() == {'error': 'could not validate credentials'}

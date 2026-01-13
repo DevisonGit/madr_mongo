@@ -12,5 +12,7 @@ uv add --dev pytest pytest-cov taskipy ruff testcontainers pytest-asyncio
 uv add pwdlib
 uv add jwt
 
+uv add --dev freezegun
+
 gh secret set -f .env
 ```
